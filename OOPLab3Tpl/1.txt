@@ -1,0 +1,74 @@
+#include <iostream>
+#include <Windows.h>
+using namespace std;
+
+class CMyDate
+{
+    int day;
+    int month;
+    int year;
+
+public:
+    CMyDate();
+    CMyDate(int d, int m, int y);
+
+    void SetDate(int d, int m, int y);
+    int GetDay(void);
+    int GetMonth(void);
+    int GetYear(void);
+};
+
+CMyDate::CMyDate()
+{
+    day = 5;
+    month = 1;
+    year = 2019;
+}
+
+CMyDate::CMyDate(int d, int m, int y)
+{
+    day = d;
+    month = m;
+    year = y;
+}
+
+void CMyDate::SetDate(int d, int m, int y)
+{
+    day = d;
+    month = m;
+    year = y;
+}
+
+int CMyDate::GetDay(void)
+{
+    return day;
+}
+
+int CMyDate::GetMonth(void)
+{
+    return month;
+}
+
+int CMyDate::GetYear(void)
+{
+    return year;
+}
+
+int main()
+{
+    SetConsoleOutputCP(1251);
+    CMyDate MD1;
+    CMyDate MD2(05, 01, 2019);
+
+    int t;
+    t = MD1.GetDay();
+    t = MD1.GetYear();
+    cout << "Дата: " << MD1.GetDay() << " січня " << MD1.GetYear() << " року " << endl;
+
+    t = MD2.GetDay();
+    t = MD2.GetMonth();
+    t = MD2.GetYear();
+    cout << "Дата2: 0" << MD2.GetDay() << ".0" << MD2.GetMonth() << "." << MD2.GetYear();
+
+    return 0;
+}

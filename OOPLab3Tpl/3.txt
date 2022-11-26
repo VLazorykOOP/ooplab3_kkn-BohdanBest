@@ -1,0 +1,325 @@
+#include <iostream>
+#include <iomanip>
+#include <ostream>
+#include <Windows.h>
+using namespace std;
+
+class Matrix
+{
+public:
+	static int matrix_count;
+
+	string error_state = "";
+
+	Matrix(unsigned int _n = 3)
+	{
+		matrix_count++;
+		n = _n;
+		m = _n;
+		matrix = new int* [n];
+		if (matrix == nullptr)
+		{
+			error_state = "Немає пам'яті";
+			return;
+		}
+		for (int i = 0; i < n; i++)
+		{
+			matrix[i] = new int[m];
+			if (matrix[i] == nullptr)
+			{
+				error_state = "Немає пам'яті";
+				return;
+			}
+			for (int j = 0; j < m; j++)
+			{
+				matrix[i][j] = 0;
+			}
+		}
+	}
+
+	Matrix(unsigned int _n, unsigned int _m, int value)
+	{
+		matrix_count++;
+		n = _n;
+		m = _m;
+		matrix = new int* [n];
+		if (matrix == nullptr)
+		{
+			error_state = "Немає пам'яті";
+			return;
+		}
+		for (int i = 0; i < n; i++)
+		{
+			matrix[i] = new int[m];
+			if (matrix[i] == nullptr)
+			{
+				error_state = "Немає пам'яті";
+				return;
+			}
+			for (int j = 0; j < m; j++)
+			{
+				matrix[i][j] = value;
+			}
+		}
+	}
+
+	Matrix(const Matrix& other)
+	{
+		matrix_count++;
+		n = other.n;
+		m = other.m;
+		matrix = new int* [n];
+		if (matrix == nullptr)
+		{
+			error_state = "Немає пам'яті";
+			return;
+		}
+		for (int i = 0; i < n; i++)
+		{
+			matrix[i] = new int[m];
+			if (matrix[i] == nullptr)
+			{
+				error_state = "Немає пам'яті";
+				return;
+			}
+			for (int j = 0; j < m; j++)
+			{
+				matrix[i][j] = other.matrix[i][j];
+			}
+		}
+	}
+
+	Matrix operator=(const Matrix& other)
+	{
+		n = other.n;
+		m = other.m;
+		if (matrix)
+		{
+			for (int i = 0; i < n; i++)
+				delete[]matrix[i];
+			delete[]matrix;
+		}
+		matrix = new int* [n];
+		if (matrix == nullptr)
+		{
+			error_state = "Немає пам'яті";
+			return Matrix();
+		}
+		for (int i = 0; i < n; i++)
+		{
+			matrix[i] = new int[m];
+			if (matrix[i] == nullptr)
+			{
+				error_state = "Немає пам'яті";
+				return Matrix();
+			}
+			for (int j = 0; j < m; j++)
+			{
+				matrix[i][j] = other.matrix[i][j];
+			}
+		}
+	}
+
+	~Matrix()
+	{
+		matrix_count--;
+		for (int i = 0; i < n; i++)
+		{
+			delete[]matrix[i];
+		}
+		delete[]matrix;
+	}
+
+	void set(unsigned int i, unsigned int j, int value)
+	{
+		if (i >= n || j >= m)
+		{
+			error_state = "Поза межами діапазону";
+			return;
+		}
+		matrix[i][j] = value;
+	}
+
+	int get(unsigned int i, unsigned int j)
+	{
+		if (i >= n || j >= m)
+		{
+			error_state = "Поза межами діапазону";
+			return 1;
+		}
+		return matrix[i][j];
+	}
+
+	unsigned int row()
+	{
+		return n;
+	}
+
+	unsigned int col()
+	{
+		return m;
+	}
+
+	void randomize(int a, int b)
+	{
+		a *= 100; b *= 100;
+		for (unsigned int i = 0; i < n; i++)
+		{
+			for (unsigned int j = 0; j < m; j++)
+			{
+				matrix[i][j] = ((rand() * rand()) % (b - a) + a) / 100;
+			}
+		}
+	}
+
+	Matrix operator+(Matrix other)
+	{
+		Matrix result(n, m, 0);
+		if (n != other.n || m != other.m)
+		{
+			result.error_state = "Недійсний розмір матриці";
+			return result;
+		}
+		for (unsigned int i = 0; i < n; i++)
+		{
+			for (unsigned int j = 0; j < m; j++)
+			{
+				result.matrix[i][j] = matrix[i][j] + other.matrix[i][j];
+			}
+		}
+		return result;
+	}
+
+	Matrix operator-(Matrix other)
+	{
+		Matrix result(n, m, 0);
+		if (n != other.n || m != other.m)
+		{
+			result.error_state = "Недійсний розмір матриці";
+			return result;
+		}
+		for (unsigned int i = 0; i < n; i++)
+		{
+			for (unsigned int j = 0; j < m; j++)
+			{
+				result.matrix[i][j] = matrix[i][j] - other.matrix[i][j];
+			}
+		}
+		return result;
+	}
+
+	Matrix operator*(Matrix other)
+	{
+		Matrix result(n, m, 0);
+		for (unsigned int i = 0; i < n; i++)
+		{
+			for (unsigned int j = 0; j < m; j++)
+			{
+				result.matrix[i][j] = matrix[i][j] * other.matrix[i][j];
+			}
+		}
+		return result;
+	}
+
+	bool operator==(Matrix other)
+	{
+		if (n != other.n || m != other.m)
+			return false;
+
+		for (unsigned int i = 0; i < n; i++)
+		{
+			for (unsigned int j = 0; j < m; j++)
+			{
+				if (matrix[i][j] != other.matrix[i][j])
+					return false;
+			}
+		}
+		return true;
+	}
+
+	bool operator!=(Matrix other)
+	{
+		return !(*this == other);
+	}
+
+	bool operator>(Matrix other)
+	{
+		if (n != other.n || m != other.m)
+			return false;
+		int count = 0;
+		for (unsigned int i = 0; i < n; i++)
+		{
+			for (unsigned int j = 0; j < m; j++)
+			{
+				if (matrix[i][j] > other.matrix[i][j])
+					count++;
+			}
+		}
+		return (count == n * m);
+	}
+
+	bool operator<(Matrix other)
+	{
+		if (n != other.n || m != other.m)
+			return false;
+		int count = 0;
+		for (unsigned int i = 0; i < n; i++)
+		{
+			for (unsigned int j = 0; j < m; j++)
+			{
+				if (matrix[i][j] < other.matrix[i][j])
+					count++;
+			}
+		}
+		return (count == n * m);
+	}
+
+	friend ostream& operator<<(ostream& out, Matrix other)
+	{
+		for (int i = 0; i < other.n; i++)
+		{
+			for (int j = 0; j < other.m; j++)
+			{
+				out << fixed;
+				out << setw(5) << other.matrix[i][j];
+			}
+			out << endl;
+		}
+		return out;
+	}
+
+private:
+	unsigned int n, m;
+	int** matrix;
+};
+
+int Matrix::matrix_count = 0;
+
+int main()
+{
+	SetConsoleOutputCP(1251);
+	srand(time(nullptr));
+	Matrix m1(3), m2(3);
+	Matrix* m3 = new Matrix();
+	m1.randomize(1, 30);
+	m2.randomize(1, 30);
+	m3->randomize(1, 30);
+	cout << "Матриця1:\n" << m1 << endl;
+	cout << "Матриця2:\n" << m2 << endl;
+	cout << "Матриця3:\n" << *m3 << endl;
+	cout << "Додавання першої та другої матриць: \n" << m1 + m2 << endl;
+	cout << "Віднімання першої та другої матриць:\n" << m1 - m2 << endl;
+	cout << "Множення першої та другої матриць:\n" << m1 * m2 << endl;
+	cout << "Порівняння: " << endl;
+	cout << "M1 < (M1 * M2): " << boolalpha << (m1 < (m1* m2)) << endl;
+	cout << "M1 > (M1 * M2): " << boolalpha << (m1 > (m1 * m2)) << endl;
+	cout << "M1 == M1: " << boolalpha << (m1 == m1) << endl;
+	cout << "M1 == M2: " << boolalpha << (m1 == m2) << endl;
+	cout << "M1 != M1: " << boolalpha << (m1 != m1) << endl;
+	cout << "M1 != M2: " << boolalpha << (m1 != m2) << endl;
+	cout << "Кількість створених матриць: " << Matrix::matrix_count << endl;
+	cout << "Видалення третьої матриці!" << endl;
+	delete m3;
+	cout << "Оновлена кількість матриць: " << Matrix::matrix_count << endl;
+	return 0;
+}
